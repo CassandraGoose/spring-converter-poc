@@ -106,18 +106,17 @@ public class ConverterController {
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			} finally {
 				try {
-					this.saveOutputFile(outputFile);
+					this.prepForTiffConversion(outputFile);
 				} catch (MagickException e) {
 					System.out.println("holy moley");
 				}
-				
 				OfficeUtils.stopQuietly(officeManager);
 			}
 		}	
 		return new ResponseEntity("Maybe?", HttpStatus.OK);
 	}
 
-	private void saveOutputFile(File outputFile) throws IOException, MagickException {
+	private void prepForTiffConversion(File outputFile) throws IOException, MagickException {
 		String path = System.getProperty("temp", File.separator + "tmp");
 		String fullPath = path + File.separator + "tmpFiles" + File.separator;
 		File dir = new File(fullPath);
@@ -149,22 +148,23 @@ public class ConverterController {
 				if (!dir.exists()) {
 					dir.mkdirs();
 				}
-				File serverFile = new File(dir.getAbsolutePath() + File.separator + "new.pdf");
-				ImageInfo currentInfo = new ImageInfo("new.pdf");
+				String serverFile = dir.getAbsolutePath() + File.separator;
+				ImageInfo currentInfo = new ImageInfo(serverFile + "new.pdf");
 				MagickImage currentImage = new MagickImage(currentInfo, bytes);
-				currentImage.breakFrames();
+				Path finalPath = Paths.get(fullPath + File.separator + "new.tiff");
+
+				// currentImage.breakFrames();
 				try { 
-					currentImage.setFileName("new.tiff");
+					currentImage.setFileName(serverFile + "new.tif");
 				} catch (MagickException e) {
 					System.out.println(e.getMessage());
 				}
-				System.out.println("here?");
 				currentImage.writeImage(currentInfo);
 				byte[] newBytes = currentImage.imageToBlob(currentInfo);
-				BufferedOutputStream stream = new BufferedOutputStream(new
-				FileOutputStream(serverFile));
-				stream.write(newBytes);
-				stream.close();
+				// BufferedOutputStream stream = new BufferedOutputStream(new
+				// FileOutputStream(serverFile));
+				Files.write(finalPath, newBytes);
+				// stream.close();
 	}
 
 	private void saveUploadedFile(List<MultipartFile> uploadedFiles) throws IOException {
