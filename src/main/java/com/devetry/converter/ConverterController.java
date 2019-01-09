@@ -25,7 +25,7 @@ public class ConverterController {
 		Date date = new Date();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyy");
 		String formattedDate = dateFormat.format(date);
-		Converter newConverter = new Converter(formattedDate, Arrays.asList(uploadedFiles));
+		Converter newConverter = new Converter(formattedDate, "TestApplicant", Arrays.asList(uploadedFiles));
 		System.out.println("Request Received.");
 		try {
 			System.out.println("Uploading files for processing.");
