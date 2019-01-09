@@ -11,6 +11,8 @@ import java.io.FileInputStream;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import org.apache.commons.io.FilenameUtils;
+
 import org.jodconverter.JodConverter;
 import org.jodconverter.document.DefaultDocumentFormatRegistry;
 import org.jodconverter.office.OfficeException;
@@ -21,7 +23,8 @@ import magick.*;
 
 public class Converter {
 	private String date;
-	private Boolean successful;
+	private String name;
+	private String extension;
 	private List<MultipartFile> uploadedFiles;
 	private File outputFile;
 	private String path = System.getProperty("temp",File.separator+"tmp");
@@ -34,13 +37,16 @@ public class Converter {
 
 	public void convert() throws OfficeException, IOException, MagickException {
 		for (MultipartFile file : uploadedFiles) {
-			outputFile = new File("new.pdf");
+			name = file.getOriginalFilename();
+			extension = FilenameUtils.getExtension(name);
+			System.out.println(extension);
+			outputFile = new File(name + ".pdf");
 			final LocalOfficeManager officeManager = LocalOfficeManager.install();
 			try {
 				officeManager.start();
 				JodConverter
 					.convert(file.getInputStream())
-					.as(DefaultDocumentFormatRegistry.DOC)
+					.as(DefaultDocumentFormatRegistry.getFormatByExtension(FilenameUtils.getExtension(name)))
 					.to(outputFile)
 					.execute();
 			} catch (OfficeException | IOException e) {
@@ -85,16 +91,12 @@ public class Converter {
 		String serverFile = dir.getAbsolutePath() + File.separator;
 		ImageInfo currentInfo = new ImageInfo(serverFile + "new.pdf");
 		MagickImage currentImage = new MagickImage(currentInfo, bytes);
-		Path finalPath = Paths.get(fullPath + File.separator + "new.tiff");
-
 		try {
-			currentImage.setFileName(serverFile + "new.tif");
+			currentImage.setFileName(serverFile + name + ".tif");
 		} catch (MagickException e) {
 			System.out.println(e.getMessage());
 		}
 		currentImage.writeImage(currentInfo);
-		byte[] newBytes = currentImage.imageToBlob(currentInfo);
-		Files.write(finalPath, newBytes);
 	}
 
 	 public void saveUploadedFile() throws IOException {

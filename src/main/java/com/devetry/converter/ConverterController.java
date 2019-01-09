@@ -1,6 +1,8 @@
 package com.devetry.converter;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.io.IOException;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +22,10 @@ public class ConverterController {
 	@PostMapping("/convert")
 	public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadedFiles) 
 		throws IOException, Exception {
-		Converter newConverter = new Converter("01-07-19", Arrays.asList(uploadedFiles));
+		Date date = new Date();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyy");
+		String formattedDate = dateFormat.format(date);
+		Converter newConverter = new Converter(formattedDate, Arrays.asList(uploadedFiles));
 		System.out.println("Request Received.");
 		try {
 			System.out.println("Uploading files for processing.");
@@ -30,7 +35,7 @@ public class ConverterController {
 		}
 
 		try {
-			System.out.println("Convert uploaded files.");
+			System.out.println("Converting uploaded files.");
 			newConverter.convert();
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
