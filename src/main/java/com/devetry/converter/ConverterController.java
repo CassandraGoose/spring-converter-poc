@@ -20,7 +20,7 @@ public class ConverterController {
 	}
 	
 	@PostMapping("/convert")
-	public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadedFiles) 
+	public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile[] uploadedFiles) 
 		throws IOException, Exception {
 		Date date = new Date();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyy");
@@ -29,7 +29,7 @@ public class ConverterController {
 		System.out.println("Request Received.");
 		try {
 			System.out.println("Uploading files for processing.");
-			newConverter.saveUploadedFile();
+			newConverter.saveOriginalFile();
 		} catch (IOException e) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
@@ -40,8 +40,6 @@ public class ConverterController {
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-
-		System.out.println("Something happened, that's for certain.");
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity("Success?", HttpStatus.OK);
 	}
 }

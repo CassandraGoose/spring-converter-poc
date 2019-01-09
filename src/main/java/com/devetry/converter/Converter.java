@@ -39,8 +39,7 @@ public class Converter {
 		for (MultipartFile file : uploadedFiles) {
 			name = file.getOriginalFilename();
 			extension = FilenameUtils.getExtension(name);
-			System.out.println(extension);
-			outputFile = new File(name + ".pdf");
+			outputFile = new File(fullPath + name + ".pdf");
 			final LocalOfficeManager officeManager = LocalOfficeManager.install();
 			try {
 				officeManager.start();
@@ -79,7 +78,6 @@ public class Converter {
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
-		System.out.println("uploaded new.pdf (probably)!");
 	}
 
 	public void convertUploadedFiles(byte[] bytes) throws MagickException, IOException {
@@ -92,27 +90,30 @@ public class Converter {
 		ImageInfo currentInfo = new ImageInfo(serverFile + "new.pdf");
 		MagickImage currentImage = new MagickImage(currentInfo, bytes);
 		try {
-			currentImage.setFileName(serverFile + name + ".tif");
+			currentImage.setFileName(serverFile + name + "-" +  date + ".tif");
 		} catch (MagickException e) {
 			System.out.println(e.getMessage());
 		}
 		currentImage.writeImage(currentInfo);
 	}
 
-	 public void saveUploadedFile() throws IOException {
+	public void saveOriginalFile() throws IOException {
 		for (MultipartFile file : uploadedFiles) {
-			if (file.isEmpty()) {
-				continue;
+			try {
+				name = file.getOriginalFilename();
+				if (file.isEmpty()) {
+					continue;
+				}
+				File dir = new File(fullPath);
+				if (!dir.exists()) {
+					dir.mkdirs();
+				}
+				byte[] bytes = file.getBytes();
+				Path finalPath = Paths.get(fullPath + File.separator + name);
+				Files.write(finalPath, bytes);
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
 			}
-			File dir = new File(fullPath);
-			if (!dir.exists()) {
-				dir.mkdirs();
-			}
-			byte[] bytes = file.getBytes();
-			Path finalPath = Paths.get(fullPath + file.getOriginalFilename());
-
-			Files.write(finalPath, bytes);
-			System.out.println("uploaded " + file.getOriginalFilename() + "(probably)!");
 		}
 	}
-	}
+}
