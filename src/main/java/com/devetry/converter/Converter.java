@@ -1,6 +1,8 @@
 package com.devetry.converter;
 
 import java.util.List;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -8,7 +10,6 @@ import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.io.IOException;
 import java.io.FileInputStream;
-
 import java.io.FileWriter;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -44,13 +45,19 @@ public class Converter {
 	String serverFile;
 	String serverFilePath;
 
-	public Converter(String date, String applicant) {
-		this.date = date;
+	public Converter(String applicant) {
 		this.applicant = applicant;
 	}
 
+	public String setDate() {
+		Date date = new Date();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+		String formattedDate = dateFormat.format(date);
+		return formattedDate;
+	}
+
 	public void convert() throws OfficeException, IOException, MagickException {
-		System.out.println("convert");
+		date = setDate();
 		for (MultipartFile file : uploadFiles) {
 			name = file.getOriginalFilename();
 			extension = FilenameUtils.getExtension(name);
@@ -77,6 +84,7 @@ public class Converter {
 	}
 
 	public void convert(File file) throws OfficeException, IOException, MagickException {
+		date = setDate();
 		name = file.getName();
 		extension = FilenameUtils.getExtension(name);
 		outputFile = new File(fullPath + name + ".pdf");
@@ -190,7 +198,7 @@ public class Converter {
 
 		File file = new File(serverFilePath);
 
-		AWSCredentials credentials = new BasicAWSCredentials("AKIAIJ3K5SWJVIYHDQQA", "6Rhaf7lPniJVZ5d1K/g0yfhwf57VQkCC9HYYC9FS");
+		AWSCredentials credentials = new BasicAWSCredentials("KEY", "SECRET");
 
 		AmazonS3 s3client = AmazonS3ClientBuilder
 			.standard()
