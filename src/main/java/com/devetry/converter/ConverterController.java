@@ -15,14 +15,13 @@ import org.springframework.http.ResponseEntity;
 
 @RestController
 public class ConverterController {
-	public String res;
-	public Boolean success = true;
 	public MultipartFile textfile;
 	public String applicant = "TestApplicant";
 	private String clientRegion = "us-west-2";
 	private String bucketName = "test-file-spring";
 	private String key = "";
 	private String secret = "";
+	String res = "hey";
 
 	public ConverterController() {
 		super();
@@ -36,7 +35,6 @@ public class ConverterController {
 			textConverter.setUploadFiles(Arrays.asList(textfile));
 			textConverter.saveOriginalFile(Arrays.asList(textfile));
 		} catch (IOException e) {
-			res = "There was an error saving original files.";
 			return new ResponseEntity<String>(res, HttpStatus.BAD_REQUEST);
 		}
 		
@@ -45,10 +43,7 @@ public class ConverterController {
 
 		S3Controller sender = new S3Controller(filePath, applicant, clientRegion, bucketName, key, secret);
 		sender.sendToS3();
-		if (success != true) {
 			return new ResponseEntity<String>(res, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		return new ResponseEntity<String>(res, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/convert", method = RequestMethod.POST)
@@ -58,16 +53,12 @@ public class ConverterController {
 			fileConverter.setUploadFiles(Arrays.asList(uploadedFiles));
 			fileConverter.saveOriginalFile(Arrays.asList(uploadedFiles));
 		} catch (IOException e) {
-			res = "There was an error saving original files.";
 			return new ResponseEntity<String>(res, HttpStatus.BAD_REQUEST);
 		}
 
 		String filePath = fileConverter.convertFile();
 		S3Controller sender = new S3Controller(filePath, applicant, clientRegion, bucketName, key, secret);
 		sender.sendToS3();
-		if (success != true) {
 			return new ResponseEntity<String>(res, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		return new ResponseEntity<String>(res, HttpStatus.OK);
 	}
 }
